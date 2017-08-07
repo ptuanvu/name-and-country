@@ -1,94 +1,122 @@
-import React, { Component } from "react";
-import { TouchableOpacity } from "react-native";
-import { connect } from "react-redux";
-import BlankPage2 from "../blankPage2";
-import DrawBar from "../DrawBar";
-import { DrawerNavigator, NavigationActions } from "react-navigation";
-import {
-  Container,
-  Header,
-  Title,
-  Content,
-  Text,
-  Button,
-  Icon,
-  Left,
-  Body,
-  Right
-} from "native-base";
-import { Grid, Row } from "react-native-easy-grid";
+import React, { Component } from 'react';
+import { connect } from 'react-redux';
 
-import { setIndex } from "../../actions/list";
-import { openDrawer } from "../../actions/drawer";
-import styles from "./styles";
+import {
+  Container, Header, Button, Right, Icon,
+  Title, Content, Text, Body,
+  Card, CardItem, Item, Input,
+} from 'native-base';
+import { Grid, Row } from 'react-native-easy-grid';
+
+import styles from './styles';
 
 class Home extends Component {
-  static navigationOptions = {
-    header: null
-  };
-  static propTypes = {
-    name: React.PropTypes.string,
-    setIndex: React.PropTypes.func,
-    list: React.PropTypes.arrayOf(React.PropTypes.string),
-    openDrawer: React.PropTypes.func
-  };
-
-  newPage(index) {
-    this.props.setIndex(index);
-    Actions.blankPage();
+  constructor(props) {
+    super(props);
+    this.state = {
+      filterName: undefined,
+      init: true,
+    };
   }
 
   render() {
-    console.log(DrawNav, "786785786");
+    const { data } = this.props;
+    const { filterName, init } = this.state;
+    const animals = data.animals.filter(str => init || (filterName !== '' && str.indexOf(filterName) === 0)).map(str => `${str}, `);
+    const countries = data.countries.filter(str => init || (filterName !== '' && str.indexOf(filterName) === 0)).map(str => `${str}, `);
+    const fruits = data.fruits.filter(str => init || (filterName !== '' && str.indexOf(filterName) === 0)).map(str => `${str}, `);
+    const boys = data.names.boys.filter(str => init || (filterName !== '' && str.indexOf(filterName) === 0)).map(str => `${str}, `);
+    const girls = data.names.girls.filter(str => init || (filterName !== '' && str.indexOf(filterName) === 0)).map(str => `${str}, `);
+
     return (
       <Container style={styles.container}>
         <Header>
-          <Left>
-
-            <Button
-              transparent
-              onPress={() => {
-                DrawerNav.dispatch(
-                  NavigationActions.reset({
-                    index: 0,
-                    actions: [NavigationActions.navigate({ routeName: "Home" })]
-                  })
-                );
-                DrawerNav.goBack();
-              }}
-            >
-              <Icon active name="power" />
-            </Button>
-          </Left>
-
           <Body>
-            <Title>Home</Title>
+            <Title>Name and Country Game</Title>
           </Body>
-
           <Right>
             <Button
               transparent
-              onPress={() => DrawerNav.navigate("DrawerOpen")}
+              onPress={() => this.setState({ init: true })}
             >
-              <Icon active name="menu" />
+              <Text>Clear</Text>
             </Button>
           </Right>
         </Header>
         <Content>
           <Grid style={styles.mt}>
-            {this.props.list.map((item, i) => (
-              <Row key={i}>
-                <TouchableOpacity
-                  style={styles.row}
-                  onPress={() =>
-                    this.props.navigation.navigate("BlankPage", {
-                      name: { item }
-                    })}
-                >
-                  <Text style={styles.text}>{item}</Text>
-                </TouchableOpacity>
-              </Row>
-            ))}
+            <Row>
+              <Card>
+                <Item>
+                  <Input value={filterName} onChangeText={(text) => { this.setState({ filterName: text, init: false }); }} placeholder="filter..." />
+                </Item>
+              </Card>
+            </Row>
+            <Row>
+              <Card>
+                <CardItem header>
+                  <Text>Animals</Text>
+                </CardItem>
+                <CardItem>
+                  <Body>
+                    <Text>
+                      {animals}
+                    </Text>
+                  </Body>
+                </CardItem>
+              </Card>
+            </Row>
+            <Row>
+              <Card>
+                <CardItem header>
+                  <Text>Countries</Text>
+                </CardItem>
+                <CardItem>
+                  <Body>
+                    <Text>
+                      {countries}
+                    </Text>
+                  </Body>
+                </CardItem>
+              </Card>
+            </Row>
+            <Row>
+              <Card>
+                <CardItem header>
+                  <Text>Fruits</Text>
+                </CardItem>
+                <CardItem>
+                  <Body>
+                    <Text>
+                      {fruits}
+                    </Text>
+                  </Body>
+                </CardItem>
+              </Card>
+            </Row>
+            <Row>
+              <Card>
+                <CardItem header>
+                  <Text>Names</Text>
+                </CardItem>
+                <CardItem>
+                  <Body>
+                    <Text header>
+                      BOYS
+                    </Text>
+                    <Text>
+                      {boys}
+                    </Text>
+                    <Text header>
+                      GIRLS
+                    </Text>
+                    <Text>
+                      {girls}
+                    </Text>
+                  </Body>
+                </CardItem>
+              </Card>
+            </Row>
           </Grid>
         </Content>
       </Container>
@@ -96,32 +124,9 @@ class Home extends Component {
   }
 }
 
-function bindAction(dispatch) {
-  return {
-    setIndex: index => dispatch(setIndex(index)),
-    openDrawer: () => dispatch(openDrawer())
-  };
-}
 const mapStateToProps = state => ({
-  name: state.user.name,
-  list: state.list.list
+  data: state.game.data,
 });
 
-const HomeSwagger = connect(mapStateToProps, bindAction)(Home);
-const DrawNav = DrawerNavigator(
-  {
-    Home: { screen: HomeSwagger },
-    BlankPage2: { screen: BlankPage2 }
-  },
-  {
-    contentComponent: props => <DrawBar {...props} />
-  }
-);
-const DrawerNav = null;
-DrawNav.navigationOptions = ({ navigation }) => {
-  DrawerNav = navigation;
-  return {
-    header: null
-  };
-};
-export default DrawNav;
+const HomeSwagger = connect(mapStateToProps, {})(Home);
+export default HomeSwagger;
